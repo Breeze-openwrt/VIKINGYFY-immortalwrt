@@ -94,8 +94,6 @@
 &tlmm {
 	gpio-reserved-ranges = <20 1>;
 
-	compatible = "qcom,ipq6000-pinctrl";
-
 	spi_1_pins: spi_1_pins {
 		mux {
 			pins = "gpio38","gpio39","gpio40","gpio41";
