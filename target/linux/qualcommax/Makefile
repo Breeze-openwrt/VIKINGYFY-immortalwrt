@@ -6,18 +6,17 @@ BOARDNAME:=Qualcomm Atheros 802.11ax WiSoC-s
 FEATURES:=squashfs ramdisk fpu nand rtc emmc
 KERNELNAME:=Image
 CPU_TYPE:=cortex-a53
-SUBTARGETS:=ipq807x ipq60xx
+SUBTARGETS:=ipq807x ipq60xx ipq50xx
 
 KERNEL_PATCHVER:=6.6
 
 include $(INCLUDE_DIR)/target.mk
 DEFAULT_PACKAGES += \
-	autocore cpufreq e2fsprogs f2fsck mkf2fs losetup luci uboot-envtools wpad-openssl \
-	kmod-fs-ext4 kmod-fs-f2fs kmod-gpio-button-hotplug kmod-leds-gpio kmod-usb3 kmod-usb-dwc3 kmod-usb-dwc3-qcom \
-	kmod-ath11k kmod-ath11k-ahb kmod-ath11k-pci kmod-phy-aquantia kmod-phy-qca83xx kmod-dsa kmod-dsa-qca8k kmod-dsa-tag-dsa \
-	kmod-qca-nss-crypto \
-	kmod-qca-nss-dp \
-	kmod-qca-nss-drv \
+	autocore automount cpufreq e2fsprogs f2fsck mkf2fs losetup luci uboot-envtools wpad-openssl \
+	kmod-dsa kmod-dsa-qca8k kmod-fs-ext4 kmod-fs-f2fs kmod-gpio-button-hotplug kmod-leds-gpio \
+	kmod-usb2 kmod-usb-dwc2 kmod-usb3 kmod-usb-dwc3 kmod-usb-dwc3-qcom \
+	kmod-ath11k kmod-ath11k-ahb kmod-ath11k-pci kmod-phy-aquantia kmod-phy-marvell kmod-phy-qca83xx \
+	kmod-qca-nss-crypto kmod-qca-nss-dp kmod-qca-nss-ecm kmod-qca-nss-drv \
 	kmod-qca-nss-drv-bridge-mgr \
 	kmod-qca-nss-drv-eogremgr \
 	kmod-qca-nss-drv-gre \
@@ -35,7 +34,5 @@ DEFAULT_PACKAGES += \
 	kmod-qca-nss-drv-vlan-mgr \
 	kmod-qca-nss-drv-vxlanmgr \
 	kmod-qca-nss-drv-wifi-meshmgr \
-	kmod-qca-nss-ecm \
-	kmod-qca-nss-macsec \
 
 $(eval $(call BuildTarget))

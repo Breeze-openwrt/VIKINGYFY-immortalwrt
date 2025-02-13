@@ -6,6 +6,7 @@
 #include "ipq6018-common.dtsi"
 #include "ipq6018-ess.dtsi"
 #include "ipq6018-nss.dtsi"
+#include "ipq6010-cp-cpu.dtsi"
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
@@ -96,7 +97,6 @@
 
 &dp3 {
 	status = "okay";
-
 	phy-handle = <&qca8072_4>;
 	label = "lan";
 };
@@ -141,7 +141,6 @@
 
 	nand@0 {
 		reg = <0>;
-
 		nand-ecc-strength = <4>;
 		nand-ecc-step-size = <512>;
 		nand-bus-width = <8>;

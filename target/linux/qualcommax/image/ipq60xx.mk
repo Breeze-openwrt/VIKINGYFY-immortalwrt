@@ -65,6 +65,24 @@ define Device/qihoo_360v6
 endef
 TARGET_DEVICES += qihoo_360v6
 
+define Device/tplink_eap610-outdoor
+	$(call Device/FitImage)
+	$(call Device/UbiFit)
+	DEVICE_VENDOR := TP-Link
+	DEVICE_MODEL := EAP610-Outdoor
+	BLOCKSIZE := 128k
+	PAGESIZE := 2048
+	SOC := ipq6000
+	DEVICE_PACKAGES := ipq-wifi-tplink_eap610-outdoor
+	IMAGES += web-ui-factory.bin
+	IMAGE/web-ui-factory.bin := append-ubi | tplink-image-2022
+	TPLINK_SUPPORT_STRING := SupportList: \
+		EAP610-Outdoor(TP-Link|UN|AX1800-D):1.0 \
+		EAP610-Outdoor(TP-Link|JP|AX1800-D):1.0 \
+		EAP610-Outdoor(TP-Link|CA|AX1800-D):1.0
+endef
+TARGET_DEVICES += tplink_eap610-outdoor
+
 define Device/yuncore_fap650
 	$(call Device/FitImage)
 	$(call Device/UbiFit)
@@ -208,7 +226,7 @@ define Device/jdcloud_re-cs-07
 	KERNEL_SIZE := 6144k
 	SOC := ipq6010
 	DEVICE_DTS_CONFIG := config@cp03-c4
-	DEVICE_PACKAGES := -ath11k-firmware-ipq6018 -ath11k-firmware-qcn9074 -kmod-ath11k -kmod-ath11k-ahb -kmod-ath11k-pci
+	DEVICE_PACKAGES := -ath11k-firmware-ipq6018 -ath11k-firmware-qcn9074 -kmod-ath11k -kmod-ath11k-ahb -kmod-ath11k-pci -hostapd-common -wpad-openssl
 	IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-rootfs | append-metadata
 endef
 TARGET_DEVICES += jdcloud_re-cs-07

@@ -108,6 +108,45 @@ tplink_do_upgrade() {
 	nand_do_upgrade "$1"
 }
 
+linksys_mx_do_upgrade() {
+	local setenv_script="/tmp/fw_env_upgrade"
+
+	CI_UBIPART="rootfs"
+	boot_part="$(fw_printenv -n boot_part)"
+	if [ -n "$UPGRADE_OPT_USE_CURR_PART" ]; then
+		if [ "$boot_part" -eq "2" ]; then
+			CI_KERNPART="alt_kernel"
+			CI_UBIPART="alt_rootfs"
+		fi
+	else
+		if [ "$boot_part" -eq "1" ]; then
+			echo "boot_part 2" >> $setenv_script
+			CI_KERNPART="alt_kernel"
+			CI_UBIPART="alt_rootfs"
+		else
+			echo "boot_part 1" >> $setenv_script
+		fi
+	fi
+
+	boot_part_ready="$(fw_printenv -n boot_part_ready)"
+	if [ "$boot_part_ready" -ne "3" ]; then
+		echo "boot_part_ready 3" >> $setenv_script
+	fi
+
+	auto_recovery="$(fw_printenv -n auto_recovery)"
+	if [ "$auto_recovery" != "yes" ]; then
+		echo "auto_recovery yes" >> $setenv_script
+	fi
+
+	if [ -f "$setenv_script" ]; then
+		fw_setenv -s $setenv_script || {
+			echo "failed to update U-Boot environment"
+			return 1
+		}
+	fi
+	nand_do_upgrade "$1"
+}
+
 platform_check_image() {
 	return 0;
 }
@@ -172,29 +211,21 @@ platform_do_upgrade() {
 		fw_setenv upgrade_available 1
 		nand_do_upgrade "$1"
 		;;
+	linksys,homewrk)
+		CI_UBIPART="rootfs"
+		remove_oem_ubi_volume ubi_rootfs
+		nand_do_upgrade "$1"
+		;;
 	linksys,mx4200v1|\
 	linksys,mx4200v2|\
-	linksys,mx4300|\
+	linksys,mx4300)
+		remove_oem_ubi_volume squashfs
+		linksys_mx_do_upgrade "$1"
+		;;
 	linksys,mx5300|\
 	linksys,mx8500)
-		boot_part="$(fw_printenv -n boot_part)"
-		if [ -n "$UPGRADE_OPT_CURR_PARTITION" ]; then
-			if [ "$boot_part" -eq "2" ]; then
-				CI_KERNPART="alt_kernel"
-				CI_UBIPART="alt_rootfs"
-			fi
-		else
-			if [ "$boot_part" -eq "1" ]; then
-				fw_setenv boot_part 2
-				CI_KERNPART="alt_kernel"
-				CI_UBIPART="alt_rootfs"
-			else
-				fw_setenv boot_part 1
-			fi
-		fi
-		fw_setenv boot_part_ready 3
-		fw_setenv auto_recovery yes
-		nand_do_upgrade "$1"
+		remove_oem_ubi_volume ubifs
+		linksys_mx_do_upgrade "$1"
 		;;
 	prpl,haze|\
 	qnap,301w)
@@ -300,6 +331,21 @@ platform_do_upgrade() {
 		fi
 		emmc_do_upgrade "$1"
 		;;
+	verizon,cr1000a)
+		CI_KERNPART="0:HLOS"
+		CI_ROOTPART="rootfs"
+		rootpart=$(find_mmc_part "$CI_ROOTPART")
+		mmcblk_hlos=$(find_mmc_part "$CI_KERNPART" | sed -e "s/^\/dev\///")
+		hlos_start=$(cat /sys/class/block/$mmcblk_hlos/start)
+		hlos_size=$(cat /sys/class/block/$mmcblk_hlos/size)
+		hlos_start_hex=$(printf "%X\n" "$hlos_start")
+		hlos_size_hex=$(printf "%X\n" "$hlos_size")
+		fw_setenv set_custom_bootargs "setenv bootargs console=ttyMSM0,115200n8 root=$rootpart rootwait fstools_ignore_partname=1"
+		fw_setenv read_hlos_emmc "mmc read 44000000 0x$hlos_start_hex 0x$hlos_size_hex"
+		fw_setenv setup_and_boot "run set_custom_bootargs;run read_hlos_emmc; bootm 44000000"
+		fw_setenv bootcmd "run setup_and_boot"
+		emmc_do_upgrade "$1"
+		;;
 	*)
 		default_do_upgrade "$1"
 		;;
@@ -311,7 +357,8 @@ platform_copy_config() {
 	prpl,haze|\
 	qnap,301w|\
 	spectrum,sax1v1k|\
-	zyxel,nbg7815)
+	zyxel,nbg7815|\
+	verizon,cr1000a)
 		emmc_copy_config
 		;;
 	esac

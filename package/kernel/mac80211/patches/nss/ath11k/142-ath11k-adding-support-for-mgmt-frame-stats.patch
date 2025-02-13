@@ -16,7 +16,7 @@
  
  #define SM(_v, _f) (((_v) << _f##_LSB) & _f##_MASK)
  
-@@ -358,6 +358,16 @@ struct ath11k_reg_tpc_power_info {
+@@ -362,6 +362,16 @@ struct ath11k_reg_tpc_power_info {
  	struct ath11k_chan_power_info chan_power_info[ATH11K_NUM_PWR_LEVELS];
  };
  
@@ -33,14 +33,15 @@
  struct ath11k_vif {
  	u32 vdev_id;
  	enum wmi_vdev_type vdev_type;
-@@ -414,6 +424,7 @@ struct ath11k_vif {
+@@ -418,7 +428,7 @@ struct ath11k_vif {
  	struct ath11k_rekey_data rekey_data;
  
  	struct ath11k_reg_tpc_power_info reg_tpc_info;
+-
 +	struct ath11k_mgmt_frame_stats mgmt_stats;
- 
  	/* Must be last - ends in a flexible-array member.
  	 *
+ 	 * FIXME: Driver should not copy struct ieee80211_chanctx_conf,
 --- a/drivers/net/wireless/ath/ath11k/debugfs.c
 +++ b/drivers/net/wireless/ath/ath11k/debugfs.c
 @@ -1589,6 +1589,87 @@ static const struct file_operations fops
